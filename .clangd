@@ -1,0 +1,26 @@
+CompileFlags:
+  Add:
+    - -IC:/Users/yoyo2/.platformio/packages/toolchain-xtensa-esp32/xtensa-esp32-elf/include
+    - -IC:/Users/yoyo2/.platformio/packages/toolchain-xtensa-esp32/xtensa-esp32-elf/sys-include
+    - -IC:/Users/yoyo2/.platformio/packages/framework-arduinoespressif32/cores/esp32
+    - -IC:/Users/yoyo2/.platformio/packages/framework-arduinoespressif32/variants/esp32
+    - -IC:/Users/yoyo2/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src
+    - -IC:/Users/yoyo2/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_wifi/include
+    - -IC:/Users/yoyo2/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_common/include
+    - -IC:/Users/yoyo2/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_netif/include
+    - -IC:/Users/yoyo2/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_event/include
+    - -IC:/Users/yoyo2/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_system/include
+    - -IC:/Users/yoyo2/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp32/include
+    - -IC:/Users/yoyo2/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/log/include
+    - -IC:/Users/yoyo2/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/soc/include
+    - -IC:/Users/yoyo2/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/hal/include
+    - -Iinclude
+    - -Isrc
+    - -DSENDER
+    - -DCOMPANY_ID="EX01"
+    - -std=gnu++11
+    - -DARDUINO=10812
+    - -DESP32
+    - -DARDUINO_ARCH_ESP32
+Diagnostics:
+  Suppress: ["*"]

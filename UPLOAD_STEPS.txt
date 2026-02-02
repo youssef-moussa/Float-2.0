@@ -1,0 +1,29 @@
+========================================
+ESP32 UPLOAD - EXACT STEPS (when nothing else works)
+========================================
+
+Your config: COM6, 9600 baud, NO auto-reset (you must do it by hand).
+
+STEP 1: Close Serial Monitor (and any other app using COM6).
+
+STEP 2: In PlatformIO click UPLOAD for "sender".
+
+STEP 3: Watch the output. As soon as you see:
+        "Connecting........_____....."
+        (or "Connecting...." with dots),
+
+STEP 4: On the ESP32 board, do this within 2 seconds:
+        (a) HOLD the BOOT button (sometimes labeled "IO0" or "0").
+        (b) While holding BOOT, PRESS and RELEASE the RESET button (or "EN").
+        (c) RELEASE the BOOT button about 1 second later.
+
+STEP 5: Upload should then continue and finish.
+
+----------------------------------------
+If it STILL fails:
+----------------------------------------
+- Try the OTHER ESP32 (receiver). If that one uploads, this board or its cable may be bad.
+- In Device Manager, confirm COM6 is the ESP32 (unplug and see which port disappears).
+- If your board is ESP32-C3 or ESP32-S2 with "USB" printed on it, it may need a different method (no COM port / different driver).
+- Run upload with verbose to see the exact error:
+  platformio run -t upload -e sender -v
