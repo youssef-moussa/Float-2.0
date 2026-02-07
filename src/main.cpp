@@ -1,120 +1,69 @@
-#include <Arduino.h>
-#include <esp_now.h>
+/************ UNDERWATER ESP32 - ESP NOW SENDER ************/
+
 #include <WiFi.h>
+#include <esp_now.h>
 
-// Shared message structure
-typedef struct {
-  char text[32];
-  uint32_t counter;
-  int32_t value;
-} MessagePacket;
+/* -------- CHANGE THIS MAC ADDRESS -------- */
+uint8_t surfaceMAC[] = {0xCO, 0xCD, 0xD6, 0x84, 0x3D, 0x0C};
+/* ---------------------------------------- */
 
-// ============================================
-// SENDER
-// ============================================
-#ifdef SENDER
+typedef struct struct_message {
+  float depth;
+  float pressure;
+  bool emergency;
+} struct_message;
 
-// Receiver MAC: C0:CD:D6:84:3D:0C
-uint8_t receiverMAC[] = {0xC0, 0xCD, 0xD6, 0x84, 0x3D, 0x0C};
+struct_message data;
 
-MessagePacket outgoing;
-esp_now_peer_info_t peerInfo;
-uint32_t sendCount = 0;
-
-void OnDataSent(const uint8_t* mac, esp_now_send_status_t status) {
-  Serial.print(status == ESP_NOW_SEND_SUCCESS ? "  [OK] sent" : "  [FAIL] send");
-  Serial.println(); 
+// Callback after sending
+void onDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
+  Serial.print("Send Status: ");
+  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "SUCCESS ✅" : "FAILED ❌");
 }
 
 void setup() {
   Serial.begin(115200);
-  delay(1500);
-  Serial.println("\n=== ESP-NOW SENDER (test) ===\n");
 
+  // Set ESP32 as Station
   WiFi.mode(WIFI_STA);
-  Serial.print("My MAC: ");
-  Serial.println(WiFi.macAddress());
+  WiFi.disconnect();
 
+  // Init ESP-NOW
   if (esp_now_init() != ESP_OK) {
-    Serial.println("ESP-NOW init failed");
+    Serial.println("❌ ESP-NOW init failed");
     return;
   }
-  esp_now_register_send_cb(OnDataSent);
 
-  memcpy(peerInfo.peer_addr, receiverMAC, 6);
-  peerInfo.channel = 0;
+  // Register send callback
+  esp_now_register_send_cb(onDataSent);
+
+  // Register peer
+  esp_now_peer_info_t peerInfo = {};
+  memcpy(peerInfo.peer_addr, surfaceMAC, 6);
+  peerInfo.channel = 0;   // same channel
   peerInfo.encrypt = false;
+
   if (esp_now_add_peer(&peerInfo) != ESP_OK) {
-    Serial.println("Add peer failed");
-  } else {
-    Serial.println("Peer added (broadcast or single MAC)\n");
-  }
-
-  Serial.println("Sending messages every 2 sec...\n");
-}
-
-void loop() {
-  // Use sprintf_P for better compatibility with Arduino/ESP C++
-  sprintf(outgoing.text, "Hello #%lu", (unsigned long)sendCount);
-  outgoing.counter = sendCount;
-  outgoing.value = (int32_t)millis();
-
-  // Use int as return type for compatibility; esp_err_t may not be defined
-  int result = esp_now_send(receiverMAC, (uint8_t*)&outgoing, sizeof(outgoing));
-
-  Serial.printf("[%lu] Sent: \"%s\" counter=%lu value=%ld (result=%s)\n",
-                millis() / 1000, outgoing.text, (unsigned long)outgoing.counter,
-                (long)outgoing.value, result == ESP_OK ? "OK" : "ERR");
-
-  sendCount++;
-  delay(2000);
-}
-
-#endif
-
-// ============================================
-// RECEIVER
-// ============================================
-#ifdef RECEIVER
-
-MessagePacket incoming;
-uint32_t recvCount = 0;
-
-void OnDataRecv(const uint8_t* mac, const uint8_t* data, int len) {
-  if (len >= (int)sizeof(MessagePacket)) {
-    memcpy(&incoming, data, sizeof(MessagePacket));
-    recvCount++;
-    Serial.println("\n--- RECEIVED ---");
-    Serial.printf("  From: %02X:%02X:%02X:%02X:%02X:%02X\n",
-                  mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-    Serial.printf("  Text:   %s\n", incoming.text);
-    Serial.printf("  Counter: %lu\n", (unsigned long)incoming.counter);
-    Serial.printf("  Value:   %ld\n", (long)incoming.value);
-    Serial.printf("  Total received: %lu\n---\n\n", (unsigned long)recvCount);
-  }
-}
-
-void setup() {
-  Serial.begin(115200);
-  delay(1500);
-  Serial.println("\n=== ESP-NOW RECEIVER (test) ===\n");
-
-  WiFi.mode(WIFI_STA);
-  Serial.print("My MAC: ");
-  Serial.println(WiFi.macAddress());
-  Serial.println("(Use this MAC in SENDER's receiverMAC[] to target this device)\n");
-
-  if (esp_now_init() != ESP_OK) {
-    Serial.println("ESP-NOW init failed");
+    Serial.println("❌ Failed to add peer");
     return;
   }
-  esp_now_register_recv_cb(OnDataRecv);
 
-  Serial.println("Waiting for messages...\n");
+  Serial.println("✅ Underwater ESP Ready");
 }
 
 void loop() {
-  delay(100);
-}
+  // Example data (replace later with sensor readings)
+  data.depth = 1.75;        // meters
+  data.pressure = 118.6;    // kPa
+  data.emergency = false;
 
-#endif
+  esp_err_t result = esp_now_send(surfaceMAC, (uint8_t *)&data, sizeof(data));
+
+  if (result == ESP_OK) {
+    Serial.println("📤 Data Sent");
+  } else {
+    Serial.println("❌ Error Sending Data");
+  }
+
+  delay(1000);
+}
