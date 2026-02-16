@@ -1,5 +1,6 @@
 // communication.cpp - ESP-NOW communication implementation for Float Device
 #include "communication.h"
+#include "config.h"
 
 // Global variables
 uint8_t stationMAC[6] = {0xC0, 0xCD, 0xD6, 0x84, 0x3D, 0x0C}; //Mac Address of Station
@@ -95,4 +96,53 @@ bool isStartCommandReceived() {
 // Clear START command flag (after processing)
 void clearStartCommand() {
     startCommandReceived = false;
+}
+/****************************************************
+ * Global pump command variable
+ * Default state is STOP for safety.
+ ****************************************************/
+uint8_t pumpCommand = PUMP_OFF;
+
+
+/****************************************************
+ * handleCommunication()
+ * --------------------------------------------------
+ * Checks if new data is available from Serial.
+ * If a valid command is received:
+ *
+ * 'F' → Fill (absorb water)
+ * 'E' → Empty (release water)
+ * 'S' → Stop
+ *
+ * This function only updates the command.
+ * It does NOT directly control the pump.
+ ****************************************************/
+void handleCommunication()
+{
+    // Check if data is available from Serial
+    if (Serial.available())
+    {
+        // Read one character from Serial buffer
+        char cmd = Serial.read();
+
+        // Decide pump state based on received command
+        switch(cmd)
+        {
+            case 'F':
+                pumpCommand = PUMP_FILL;
+                break;
+
+            case 'E':
+                pumpCommand = PUMP_EMPTY;
+                break;
+
+            case 'S':
+                pumpCommand = PUMP_OFF;
+                break;
+
+            default:
+                // Ignore unknown commands
+                break;
+        }
+    }
 }

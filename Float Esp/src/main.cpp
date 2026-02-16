@@ -40,6 +40,23 @@ void setup() {
     
     Serial.println("\n--- Waiting for START command ---");
     Serial.println("System ready. Waiting at surface...\n");
+
+    // Start Serial communication (for debugging or surface control)
+    /****************************************************
+ * setup()
+ * --------------------------------------------------
+ * Runs once at system startup.
+ * Initializes Serial and pump control pins.
+ ****************************************************/
+    Serial.begin(115200);
+
+    // Set H-Bridge pins as outputs
+    pinMode(PUMP_IN_PIN , OUTPUT);
+    pinMode(PUMP_OUT_PIN, OUTPUT);
+
+    // Ensure pump is stopped at startup (safety)
+    digitalWrite(PUMP_IN_PIN, LOW);
+    digitalWrite(PUMP_OUT_PIN, LOW);
 }
 
 void loop() {
@@ -74,4 +91,61 @@ void loop() {
     }
     
     delay(100);
+
+    // Update pumpCommand if new Serial data received
+    handleCommunication();
+
+    // Apply the latest command to the pump
+    controlPump(pumpCommand);
+}
+
+/****************************************************
+ * controlPump(state)
+ * --------------------------------------------------
+ * Controls motor direction based on given state.
+ *
+ * Important Safety Rule:
+ * IN1 and IN2 must NEVER be HIGH at the same time.
+ *
+ * Includes direction-change protection:
+ * If direction changes, motor is stopped briefly
+ * before reversing to protect H-Bridge.
+ ****************************************************/
+void controlPump(uint8_t state)
+{
+    // Keeps track of previous state
+    static uint8_t lastState = PUMP_OFF;
+
+    // If direction changed → stop briefly first
+    if (state != lastState)
+    {
+        digitalWrite(PUMP_IN_PIN, LOW);
+        digitalWrite(PUMP_OUT_PIN, LOW);
+
+        delay(200);  // 200ms safety delay
+
+        lastState = state;
+    }
+
+    switch(state)
+    {
+        case PUMP_FILL:
+            // Forward direction
+            digitalWrite(PUMP_IN_PIN, HIGH);
+            digitalWrite(PUMP_OUT_PIN, LOW);
+            break;
+
+        case PUMP_EMPTY:
+            // Reverse direction
+            digitalWrite(PUMP_IN_PIN, LOW);
+            digitalWrite(PUMP_OUT_PIN, HIGH);
+            break;
+
+        case PUMP_OFF:
+        default:
+            // Stop motor
+            digitalWrite(PUMP_IN_PIN, LOW);
+            digitalWrite(PUMP_OUT_PIN, LOW);
+            break;
+    }
 }

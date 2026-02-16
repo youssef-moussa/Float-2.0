@@ -2,6 +2,7 @@
 #ifndef COMMUNICATION_H
 #define COMMUNICATION_H
 
+#include <Arduino.h>
 #include <esp_now.h>
 #include <WiFi.h>
 #include "config.h"
@@ -15,5 +16,9 @@ bool initCommunication();
 void sendDataToStation(String data);
 bool isStartCommandReceived();
 void clearStartCommand();
+
+extern uint8_t pumpCommand;
+
+void handleCommunication();
 
 #endif // COMMUNICATION_H

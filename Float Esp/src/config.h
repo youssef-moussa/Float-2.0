@@ -133,5 +133,14 @@ enum MissionState {
     SURFACED,                   // All profiles complete, at surface
     EMERGENCY                   // Emergency state - surface immediately
 };
+// ===== H-Bridge Control Pins =====
+// Pump Pins
+#define PUMP_IN_PIN     25   
+#define PUMP_OUT_PIN    26   
+
+// Pump States
+#define PUMP_OFF        0 // Motor stopped
+#define PUMP_FILL       1 //(absorb water)
+#define PUMP_EMPTY      2 //(release water)
 
 #endif // CONFIG_H
