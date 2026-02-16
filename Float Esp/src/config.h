@@ -2,6 +2,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <Arduino.h>
+
 // ===========================
 // HARDWARE PIN DEFINITIONS
 // ===========================
@@ -87,7 +89,7 @@
 
 // ESP-NOW
 #define CHANNEL 1                    // WiFi channel for ESP-NOW
-uint8_t stationMAC[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}; 
+extern uint8_t stationMAC[6];  // Declare only, don't define. To be replaced with the mac address of esp at station
 
 // ===========================
 // DATA LOGGING SETTINGS
